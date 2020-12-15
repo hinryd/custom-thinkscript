@@ -1,0 +1,19 @@
+## todo: always label indicate, trigger price and current status
+
+def period = AggregationPeriod.DAY;
+def dayLow = low(period = period);
+def dayClose = close(period = period);
+
+def isSSRPrevDay = dayLow[1] <= .90 * dayClose[2];
+def isSSRToday = dayLow <= .90 * dayClose[1];
+def SSRstatus = isSSRPrevDay or isSSRToday;
+
+def showTodayLine = dayLow <= dayClose[1] * .91 && !isSSRPrevDay;
+plot todaySSRLine = if showTodayLine then dayClose[1] * .90 else Double.NaN;
+todaySSRLine.setPaintingStrategy(PaintingStrategy.line);
+todaySSRLine.setDefaultColor(color.red);
+
+Alert(SSRstatus, "SSR Triggered" + "" + getsymbol() + "@" + asDollars(todaySSRLine), Alert.ONCE, Sound.Bell);
+AddLabel(SSRstatus, ("SSR ON! @ " + asDollars(todaySSRLine)), Color.RED);
+AddLabel(!SSRstatus, ("SSR OFF"), Color.CYAN);
+AddLabel(showTodayLine, ("Trigger @ " + asDollars(todaySSRLine)), Color.CYAN);
